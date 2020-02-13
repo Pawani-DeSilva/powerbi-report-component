@@ -1,11 +1,11 @@
 /* eslint-disable*/
-
+​
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { models } from 'powerbi-client';
 import Embed from './Embed';
 import { clean } from './utils';
-
+​
 const createConfig = props => {
   if (props) {
     const {
@@ -16,10 +16,10 @@ const createConfig = props => {
       embedId,
       permissions,
       pageName,
-      extraSettings,
+      embedConfigs,
       dashboardId,
     } = props;
-
+​
     return clean({
       type: embedType,
       tokenType: models.TokenType[tokenType],
@@ -28,18 +28,13 @@ const createConfig = props => {
       id: embedId,
       pageName: pageName,
       dashboardId: dashboardId,
-      pageView: 'fitToWidth',
       permissions: models.Permissions[permissions],
-      settings: {
-        filterPaneEnabled: true,
-        navContentPaneEnabled: true,
-        ...extraSettings,
-      },
+      embedConfigs
     });
   }
   return null;
 };
-
+​
 class Report extends PureComponent {
   constructor(props) {
     super(props);
@@ -49,15 +44,15 @@ class Report extends PureComponent {
     this.performOnEmbed = this.performOnEmbed.bind(this);
     this.updateState = this.updateState.bind(this);
   }
-
+​
   componentDidMount() {
     this.updateState(this.props);
   }
-
+​
   static getDerivedStateFromProps(props) {
     return { currentConfig: createConfig(props) };
   }
-
+​
   performOnEmbed(report, reportRef) {
     const {
       embedType,
@@ -70,7 +65,7 @@ class Report extends PureComponent {
       onFiltersApplied,
       onCommandTriggered,
     } = this.props;
-
+​
     if (embedType === 'report') {
       report.on('loaded', () => {
         if (onLoad) onLoad(report);
@@ -105,7 +100,7 @@ class Report extends PureComponent {
       });
     } else if (embedType === 'dashboard') {
       if (onLoad) onLoad(report, powerbi.get(reportRef));
-
+​
       report.on('tileClicked', event => {
         if (onTileClicked) {
           onTileClicked(event.detail);
@@ -113,18 +108,18 @@ class Report extends PureComponent {
       });
     }
   }
-
+​
   updateState(props) {
     this.setState({
       currentConfig: createConfig(props),
     });
   }
-
+​
   render() {
     if (!this.state.currentConfig) {
       return <div> Error </div>;
     }
-
+​
     return (
       <Embed
         config={this.state.currentConfig}
@@ -134,7 +129,7 @@ class Report extends PureComponent {
     );
   }
 }
-
+​
 Report.propTypes = {
   embedType: PropTypes.string.isRequired,
   tokenType: PropTypes.string.isRequired,
@@ -150,5 +145,5 @@ Report.propTypes = {
   onTileClicked: PropTypes.func,
   style: PropTypes.object,
 };
-
+​
 export default Report;
